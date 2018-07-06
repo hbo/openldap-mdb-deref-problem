@@ -44,7 +44,21 @@ This python scripts writes a DIT to a slapd running under
 ldap://127.0.0.1:1234 
 
 The DIT contains People and property entries, and Groups, where each
-group has alias subentries, which point to the people in the group. 
+group has alias subentries, which point to the people in the group.
+
+The size of the DIT can be manipulated by setting a couple of
+variables to different values:
+- NRPEOPLE: Number of people entries in the DIT
+- NRGROUPS: Numer of groups created 
+- NRPROPS: number of properties associated with each person. They will
+  be attached as subentries to the person entry
+- MAXGRPSIZE: max size of a group. The actual size is determined
+pseudo-randomly. For each group member one alias entry will be added
+to the DIT. So approx MAXGRPSIZE * NRGROUPS / 2 will be present in the
+generated DIT
+
+With NRPEOPLE the size of the DIT can be influenced without adding
+extra aliases.
 
 ### ./scripts/doit.sh 
 
@@ -58,11 +72,11 @@ instance under ldap://127.0.0.1:1234
 
 ## How to use it
 
-cd ./scripts 
-
-export OPENLDAP=<path to the openldap repo copy>
-
-bash ./doit.sh
+```
+> cd ./scripts 
+> export OPENLDAP=<path to the openldap repo copy>
+> bash ./doit.sh
+```
 
 The script will run for a while. In the end two slapds are running
 with exactly the same DIT. 
