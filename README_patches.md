@@ -67,3 +67,16 @@ slapcat/slapadd cycle makes this probably not a candidate for a 2.4.X
 release, if ever. On the other hand, this can be made optional at
 compile time, which would give distribution maintainers the
 opportunity to switch the feature off.
+
+### OpenLDAP tests
+
+The patched slapd passses all tests in the tests directory ( ```make
+mdb``` ) except for test066-autoca; this fails with an unpatched slapd
+as well, though.
+
+### Longterm tests
+
+This is still to do.
+
+Plans are to derive test-cases from log files and to do regression
+testing between a patched back-mdb and a back-hdb configuration.
