@@ -68,7 +68,7 @@ generate a DIT, slapcats/slapadds the DIT to the other instance and
 starts that one as well. 
 
 The HDB instance runs then under ldap://127.0.0.1:1234, the MDB
-instance under ldap://127.0.0.1:1234 
+instance under ldap://127.0.0.1:1235 
 
 ## How to use it
 
