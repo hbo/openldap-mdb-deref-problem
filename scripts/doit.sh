@@ -1,11 +1,24 @@
 #!/bin/bash
 
 
-pref="$HOME/software/openldap"
 
-tmp=$( mktemp -d )
-tmp=$( mktemp -d )
+
+pref="${OPENLDAP:-$HOME/openldap}"
+
+if  ! [ -x "${pref}/servers/slapd/slapd" ]; then
+    cat <<EOF >/dev/stderr
+"${pref}/servers/slapd/slapd" not executable
+
+Plese set the OPENLDAP environment variable
+to a compiled openldap git repository
+EOF
+    exit 1
+fi
+
 here=$( pwd )
+tmp="${here}/tmp"
+
+mkdir -p $tmp
 
 pidfilepref="$tmp/slapd"
 mdbpidfile="${pidfilepref}.mdb.pid"
@@ -13,9 +26,9 @@ hdbpidfile="${pidfilepref}.hdb.pid"
 conffilepref="$here/slapd"
 dbdirpref="$here/dbdir"
 
-debug='trace,stats'
+debug='0'
 
-trap "{  rm -rf $tmp ; }"  EXIT
+#trap "{  rm -rf $tmp ; }"  EXIT
 
 function write_config(){
     conffile="$1"
@@ -81,9 +94,8 @@ write_config    $mdbconf mdb $dbdirpref
 write_config    $hdbconf hdb $dbdirpref
 
 
-ldiffile=
-if [ $# -gt  0 ]; then
-    ldiffile="$1"
+ldiffile="$1"
+if [ -n "$ldiffile" ]; then
     if [ -e $ldiffile ] ; then
         $pref/servers/slapd/slapadd -l $ldiffile -b 'ou=test,dc=example,dc=com' -f $mdbconf -q -s 
         $pref/servers/slapd/slapadd -l $ldiffile -b 'ou=test,dc=example,dc=com' -f $hdbconf -q -s 
@@ -91,17 +103,33 @@ if [ $# -gt  0 ]; then
     exit
 fi
 
-$pref/servers/slapd/slapd -f $conffile -4 -d $debug -h ldap://127.0.0.1:1234  > $here/slapd.log 2>&1 &
+$pref/servers/slapd/slapd -f $hdbconf -4 -d $debug -h ldap://127.0.0.1:1234  > $here/hdbslapd.log 2>&1 &
 
 sleep 2
 
-pid=$( cat $pidfile )
+hdbpid=$( cat $hdbpidfile )
 
-trap "{ echo killing $pid ;  kill  $pid ;     rm -rf $tmp ; }"  EXIT
-echo slapd running under $pid
+trap "{ echo killing $hdbpid ;  kill  $hdbpid ;     rm -rf $tmp ; }"  EXIT
+echo "HDB slapd running under $hdbpid"
 
-if [ -z "$ldiffile"  ]; then 
-    time python3 write_tree.py
+sleep 10
+
+if [ -z "$ldiffile"  ]; then
+    echo "Building DIT" 
+    python3 write_tree.py
+
+    rm -f "${tmp}/slap.ldif"
+    $pref/servers/slapd/slapcat -f $hdbconf -b 'ou=test,dc=example,dc=com' -l "${tmp}/slap.ldif"
+    $pref/servers/slapd/slapadd -f $mdbconf -b 'ou=test,dc=example,dc=com' -l "${tmp}/slap.ldif" -s -q
 fi
 
-wait $pid
+$pref/servers/slapd/slapd -f $mdbconf -4 -d $debug -h ldap://127.0.0.1:1235  > $here/mdbslapd.log 2>&1 &
+
+sleep 10
+
+mdbpid=$( cat $mdbpidfile )
+echo "MDB slapd running under $mdbpid"
+
+trap "{ echo killing $hdbpid $mdbpid ;  kill  $hdbpid $mdbpid ;     rm -rf $tmp ; }"  EXIT
+
+wait $mdbpid $hdbpid

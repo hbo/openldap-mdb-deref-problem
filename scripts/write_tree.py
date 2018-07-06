@@ -4,6 +4,13 @@ import re
 import collections
 import random
 
+
+NRPEOPLE=8000
+NRGROUPS=4000
+NRPROPS=30
+MAXGRPSIZE=250
+
+
 host='127.0.0.1'
 port=1234
 base='ou=test,dc=example,dc=com'
@@ -20,10 +27,6 @@ random.seed('Now is the winter of our discontent made glorious summer')
 
 PBASE=1000000
 GBASE=1000000
-NRPEOPLE=3000
-NRGROUPS=2000
-NRPROPS=30
-MAXGRPSIZE=100
 
 def add_root(root):
     if not CONN.add(dn='{}'.format(root),
