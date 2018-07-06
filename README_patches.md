@@ -60,4 +60,10 @@ experimenting.
 The patch improves efficiency of alias dereferencing in the MDB
 backend. Not in all cases, although in a high-request-rate scenario
 the load of the system will in all likelihood decrease dramatically
-(or, view from a different angle, keep the system responsive).
+(or, seen from a different angle, keep the system responsive).
+
+The fact the an upgrade to this version of slapd requires a
+slapcat/slapadd cycle makes this probably not a candidate for a 2.4.X
+release, if ever. On the other hand, this can be made optional at
+compile time, which would give distribution maintainers the
+opportunity to switch the feature off.

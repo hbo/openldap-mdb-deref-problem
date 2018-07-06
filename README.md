@@ -114,3 +114,18 @@ sys     0m0.027s
 ## Patch
 
 The patches to fix the problem are described in README_patches.md. 
+
+## Tests
+
+### OpenLDAP tests
+
+The patched slapd passses all tests in the tests directory ( ```make
+mdb``` ) except for test066-autoca; this fails with an unpatched slapd
+as well, though.
+
+### Longterm tests
+
+This is still to do.
+
+Plans are to derive test-cases from log files and to do regression
+testing between a patched back-mdb and a back-hdb configuration.

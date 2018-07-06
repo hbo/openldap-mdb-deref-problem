@@ -28,6 +28,21 @@ The naliases entry of the search root id is exploited like this:
   the IDL range for aliases retreived from the objectClass index. This
   is essentially the same behavior as implemented in mdb_idscope, only
   that it takes orders of magnitude fewer CPU cycles to get there.
+
+LEGAL MATTER:
+
+The attached patch file is derived from OpenLDAP Software. All of the
+modifications to OpenLDAP Software represented in the following
+patch(es) were developed by Henrik Bohnenkamp,
+hbohnenkamp@united-internet.de. I have not assigned rights and/or
+interest in this work to any party.
+
+I, Henrik Bohnenkamp, hereby place the following modifications to
+OpenLDAP Software (and only these modifications) into the public
+domain. Hence, these modifications may be freely used and/or
+redistributed for any purpose with or without attribution and/or other
+notice.
+
 ---
  servers/slapd/back-mdb/delete.c    |   2 +-
  servers/slapd/back-mdb/dn2id.c     | 165 +++++++++++++++++++++++++++++

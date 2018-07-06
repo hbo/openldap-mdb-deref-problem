@@ -26,6 +26,9 @@ hdbpidfile="${pidfilepref}.hdb.pid"
 conffilepref="$here/slapd"
 dbdirpref="$here/dbdir"
 
+rm -f "${mdbpidfile}" "${hdbpidfile}"
+
+
 debug='0'
 
 #trap "{  rm -rf $tmp ; }"  EXIT
@@ -41,15 +44,16 @@ function write_config(){
     rm -rf $dbdir/*
     
     cat <<EOF > $conffile
-include         $pref/tests/schema/core.schema
-include         $pref/tests/schema/cosine.schema
-include         $pref/tests/schema/inetorgperson.schema
-include         $pref/tests/schema/openldap.schema
-include         $pref/tests/schema/nis.schema
-include         $pref/tests/testdata/test.schema
+include         $pref/servers/slapd/schema/core.schema
+include         $pref/servers/slapd/schema/cosine.schema
+include         $pref/servers/slapd/schema/inetorgperson.schema
+include         $pref/servers/slapd/schema/openldap.schema
+include         $pref/servers/slapd/schema/nis.schema
+
 
 pidfile         $pidfile
 argsfile        $tmp/slapd.1.args
+loglevel        0
 
 sockbuf_max_incoming 4194303
 
@@ -105,18 +109,32 @@ fi
 
 $pref/servers/slapd/slapd -f $hdbconf -4 -d $debug -h ldap://127.0.0.1:1234  > $here/hdbslapd.log 2>&1 &
 
-sleep 2
+
+echo -n "waiting for HDB slapd to come up ..."
+
+
+while ! [ -e $hdbpidfile  ] ; do
+    sleep 1
+    echo -n .
+done
 
 hdbpid=$( cat $hdbpidfile )
 
 trap "{ echo killing $hdbpid ;  kill  $hdbpid ;     rm -rf $tmp ; }"  EXIT
+echo
 echo "HDB slapd running under $hdbpid"
 
 sleep 10
 
 if [ -z "$ldiffile"  ]; then
-    echo "Building DIT" 
+    echo "Building DIT"
+
     python3 write_tree.py
+
+    ret=$?
+    if [ $ret -ne 0 ] ;then
+        exit
+    fi
 
     rm -f "${tmp}/slap.ldif"
     $pref/servers/slapd/slapcat -f $hdbconf -b 'ou=test,dc=example,dc=com' -l "${tmp}/slap.ldif"
@@ -125,9 +143,17 @@ fi
 
 $pref/servers/slapd/slapd -f $mdbconf -4 -d $debug -h ldap://127.0.0.1:1235  > $here/mdbslapd.log 2>&1 &
 
-sleep 10
+echo -n "waiting for MDB slapd to come up ..."
+
+
+while ! [ -e $mdbpidfile  ] ; do
+    sleep 1
+    echo -n .
+done
+
 
 mdbpid=$( cat $mdbpidfile )
+echo
 echo "MDB slapd running under $mdbpid"
 
 trap "{ echo killing $hdbpid $mdbpid ;  kill  $hdbpid $mdbpid ;     rm -rf $tmp ; }"  EXIT

@@ -35,6 +35,20 @@ necessary to all calls to these functions, by adding a NULL.
 The side effect of the dn2id function (when passed a cursor the cursor
 must point to the right entry in the DB on return) is observed.
 
+LEGAL MATTER:
+
+The attached patch file is derived from OpenLDAP Software. All of the
+modifications to OpenLDAP Software represented in the following
+patch(es) were developed by Henrik Bohnenkamp,
+hbohnenkamp@united-internet.de. I have not assigned rights and/or
+interest in this work to any party.
+
+I, Henrik Bohnenkamp, hereby place the following modifications to
+OpenLDAP Software (and only these modifications) into the public
+domain. Hence, these modifications may be freely used and/or
+redistributed for any purpose with or without attribution and/or other
+notice.
+
 ---
  servers/slapd/back-mdb/add.c         |  6 ++-
  servers/slapd/back-mdb/bind.c        |  2 +-
