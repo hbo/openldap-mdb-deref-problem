@@ -38,7 +38,7 @@ MDB, one HDB)
 
 ## scripts in ./scripts
 
-### _./scripts/write_tree.py _ 
+### ./scripts/write_tree.py  
 
 This python scripts writes a DIT to a slapd running under
 ldap://127.0.0.1:1234 
