@@ -68,6 +68,8 @@ release, if ever. On the other hand, this can be made optional at
 compile time, which would give distribution maintainers the
 opportunity to switch the feature off.
 
+## Tests
+
 ### OpenLDAP tests
 
 The patched slapd passses all tests in the tests directory ( ```make

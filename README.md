@@ -131,5 +131,4 @@ request.
 
 The patches to fix the problem are described in README_patches.md. 
 
-## Tests
 
