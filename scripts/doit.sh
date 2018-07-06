@@ -101,10 +101,9 @@ write_config    $hdbconf hdb $dbdirpref
 ldiffile="$1"
 if [ -n "$ldiffile" ]; then
     if [ -e $ldiffile ] ; then
-        $pref/servers/slapd/slapadd -l $ldiffile -b 'ou=test,dc=example,dc=com' -f $mdbconf -q -s 
         $pref/servers/slapd/slapadd -l $ldiffile -b 'ou=test,dc=example,dc=com' -f $hdbconf -q -s 
+        $pref/servers/slapd/slapadd -l $ldiffile -b 'ou=test,dc=example,dc=com' -f $mdbconf -q -s 
     fi
-    exit
 fi
 
 $pref/servers/slapd/slapd -f $hdbconf -4 -d $debug -h ldap://127.0.0.1:1234  > $here/hdbslapd.log 2>&1 &
@@ -122,9 +121,9 @@ hdbpid=$( cat $hdbpidfile )
 
 trap "{ echo killing $hdbpid ;  kill  $hdbpid ;     rm -rf $tmp ; }"  EXIT
 echo
-echo "HDB slapd running under $hdbpid"
+echo "HDB slapd running under pid  $hdbpid port 1234"
 
-sleep 10
+
 
 if [ -z "$ldiffile"  ]; then
     echo "Building DIT"
@@ -154,7 +153,7 @@ done
 
 mdbpid=$( cat $mdbpidfile )
 echo
-echo "MDB slapd running under $mdbpid"
+echo "MDB slapd running under pid $mdbpid port 1235"
 
 trap "{ echo killing $hdbpid $mdbpid ;  kill  $hdbpid $mdbpid ;     rm -rf $tmp ; }"  EXIT
 

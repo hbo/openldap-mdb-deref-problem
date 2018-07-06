@@ -87,8 +87,9 @@ instance under ldap://127.0.0.1:1235
 > bash ./doit.sh
 ```
 
-The script will run for a while. In the end two slapds are running
-with exactly the same DIT. 
+The script will run for a while (less than an hour on recent
+hardware). In the end two slapds are running with exactly the same
+DIT.
 
 Issue searchrequests like this 
 
@@ -99,26 +100,32 @@ Requests to port 1234 (HDB) might respond slowly (depending on the depth of the 
 
 The same request to port 1235 (MDB) will not return and clog up one CPU. 
 
-
-Request to MDB slapd:
-
-```
-time ldapsearch -LLL -x -H ldap://127.0.0.1:1235 -D cn=Manager,ou=test,dc=example,dc=com -w secret -b uid=2000093,ou=Groups,ou=withAliases,ou=test,dc=example,dc=com -s sub -a always dn > /dev/null
-
-real    0m57.343s
-user    0m0.000s
-sys     0m0.018s
-```
+## Example
 
 Request to HDB slapd:
 
 ```
-time ldapsearch -LLL -x -H ldap://127.0.0.1:1234 -D cn=Manager,ou=test,dc=example,dc=com -w secret -b uid=2000093,ou=Groups,ou=withAliases,ou=test,dc=example,dc=com -s sub -a always dn > /dev/null
+time clients/tools/ldapsearch -LLL -x -H ldap://127.0.0.1:1234 -D cn=Manager,ou=test,dc=example,dc=com -w secret -b uid=2000093,ou=Groups,ou=withAliases,ou=test,dc=example,dc=com -s sub -a always dn | grep dn: | wc -l 
+7601
 
-real    0m0.922s
-user    0m0.008s
-sys     0m0.027s
+real    0m0.149s
+user    0m0.042s
+sys     0m0.048s
 ```
+
+Request to MDB slapd:
+
+```
+time clients/tools/ldapsearch -LLL -x -H ldap://127.0.0.1:1235 -D cn=Manager,ou=test,dc=example,dc=com -w secret -b uid=2000093,ou=Groups,ou=withAliases,ou=test,dc=example,dc=com -s sub -a always dn | grep dn: | wc -l
+7601
+
+real    0m22.918s
+user    0m0.041s
+sys     0m0.021s
+```
+
+The MDB slapd needs roughly 150 times longer to serve the same
+request.
 
 ## Patch
 
