@@ -129,7 +129,7 @@ sleep 10
 if [ -z "$ldiffile"  ]; then
     echo "Building DIT"
 
-    python3 write_tree.py
+    time python3 write_tree.py
 
     ret=$?
     if [ $ret -ne 0 ] ;then

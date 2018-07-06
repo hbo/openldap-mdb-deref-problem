@@ -28,9 +28,9 @@ MDB, one HDB)
 
 - A copy of the OpenLDAP git repository. At least the
   slapd/slapadd/slapcat binaries should be available in the
-  servers/slapd directory, and the schema definitions in the test
+  servers/slapd directory, and the schema definitions in the servers/slapd/schema
   directory
-- python3 in you PATH  
+- python3 in your PATH  
 - The python3 ldap3 module
 
 
@@ -44,7 +44,8 @@ This python scripts writes a DIT to a slapd running under
 ldap://127.0.0.1:1234 
 
 The DIT contains People and property entries, and Groups, where each
-group has alias subentries, which point to the people in the group.
+group has alias subentries, which point to the respective people
+entries of the  group members.
 
 The size of the DIT can be manipulated by setting a couple of
 variables to different values:
@@ -59,6 +60,14 @@ generated DIT
 
 With NRPEOPLE the size of the DIT can be influenced without adding
 extra aliases.
+
+The current default is
+NRPEOPLE=15000
+NRGROUPS=3000
+NRPROPS=100
+MAXGRPSIZE=400
+
+
 
 ### ./scripts/doit.sh 
 
