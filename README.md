@@ -46,7 +46,7 @@ ldap://127.0.0.1:1234
 The DIT contains People and property entries, and Groups, where each
 group has alias subentries, which point to the people in the group. 
 
-### _./scripts/doit.sh_ 
+### ./scripts/doit.sh 
 
 Is a bash script which provides configurations for an MDB and HDB
 instance of slapd, which starts one instance, calls write_tree.py to
