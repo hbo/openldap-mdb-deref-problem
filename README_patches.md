@@ -1,5 +1,6 @@
-# Patches to improve the back-mdb performance in large DITs with
-   deref=always and scope=sub
+# Patches to improve the back-mdb performance in large DITs with  deref=always and scope=sub
+
+The patches can be found in the ./patches directory.
 
 ### 0001-Extension-of-dn2id-DB-by-entry-counting-number-of-al.patch
 
