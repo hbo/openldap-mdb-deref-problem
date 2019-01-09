@@ -89,4 +89,6 @@ The same patch, adapted to the released tar file of OpenLDAP 2.4.46
 can be found in directory patches/2.4.46-patch/. The patch applies
 also to version 2.4.47 without problem, since the changes in the
 back-mdb code  between 2.4.46 and 2.4.47 are small and do
-not conflict.
+not conflict. 
+
+Still untested, though.
