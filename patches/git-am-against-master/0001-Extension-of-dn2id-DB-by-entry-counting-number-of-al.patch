@@ -1,7 +1,7 @@
-From 76b59d6efdd0d37bde3afc572b65f00fe075ec25 Mon Sep 17 00:00:00 2001
+From 74be918e175d4e763d5d84bc4c3132028829ede8 Mon Sep 17 00:00:00 2001
 From: Henrik Bohnenkamp <hbohnenkamp@united-internet.de>
 Date: Tue, 19 Jun 2018 23:15:43 +0200
-Subject: [PATCH 1/2] Extension of dn2id DB by entry counting number of aliases
+Subject: [PATCH 1/3] Extension of dn2id DB by entry counting number of aliases
  in subtree
 
 This commit adds a 2nd field to the entries in the dn2id database
@@ -48,7 +48,6 @@ OpenLDAP Software (and only these modifications) into the public
 domain. Hence, these modifications may be freely used and/or
 redistributed for any purpose with or without attribution and/or other
 notice.
-
 ---
  servers/slapd/back-mdb/add.c         |  6 ++-
  servers/slapd/back-mdb/bind.c        |  2 +-
@@ -66,7 +65,7 @@ notice.
  13 files changed, 105 insertions(+), 41 deletions(-)
 
 diff --git a/servers/slapd/back-mdb/add.c b/servers/slapd/back-mdb/add.c
-index 26bd264cc..732ad03ac 100644
+index 7d6fe26ba..2cf50b113 100644
 --- a/servers/slapd/back-mdb/add.c
 +++ b/servers/slapd/back-mdb/add.c
 @@ -117,7 +117,8 @@ mdb_add(Operation *op, SlapReply *rs )
@@ -90,7 +89,7 @@ index 26bd264cc..732ad03ac 100644
  	if ( rs->sr_err != 0 ) {
  		Debug( LDAP_DEBUG_TRACE,
 diff --git a/servers/slapd/back-mdb/bind.c b/servers/slapd/back-mdb/bind.c
-index 060ca750f..924f2f179 100644
+index b4b8cad72..3f1046b6f 100644
 --- a/servers/slapd/back-mdb/bind.c
 +++ b/servers/slapd/back-mdb/bind.c
 @@ -67,7 +67,7 @@ mdb_bind( Operation *op, SlapReply *rs )
@@ -103,7 +102,7 @@ index 060ca750f..924f2f179 100644
  	switch(rs->sr_err) {
  	case MDB_NOTFOUND:
 diff --git a/servers/slapd/back-mdb/compare.c b/servers/slapd/back-mdb/compare.c
-index 47886f091..53f757147 100644
+index 000df5ee0..ed4b1a0f7 100644
 --- a/servers/slapd/back-mdb/compare.c
 +++ b/servers/slapd/back-mdb/compare.c
 @@ -43,7 +43,7 @@ mdb_compare( Operation *op, SlapReply *rs )
@@ -116,7 +115,7 @@ index 47886f091..53f757147 100644
  	case MDB_NOTFOUND:
  	case 0:
 diff --git a/servers/slapd/back-mdb/delete.c b/servers/slapd/back-mdb/delete.c
-index cdc8f3d97..b6e0e4583 100644
+index 4592ae15b..1e723977e 100644
 --- a/servers/slapd/back-mdb/delete.c
 +++ b/servers/slapd/back-mdb/delete.c
 @@ -87,7 +87,7 @@ mdb_delete( Operation *op, SlapReply *rs )
@@ -148,7 +147,7 @@ index cdc8f3d97..b6e0e4583 100644
  	if ( rs->sr_err != 0 ) {
  		Debug(LDAP_DEBUG_TRACE,
 diff --git a/servers/slapd/back-mdb/dn2entry.c b/servers/slapd/back-mdb/dn2entry.c
-index 50b6688ae..123daecdf 100644
+index 708d15950..e3a82ce75 100644
 --- a/servers/slapd/back-mdb/dn2entry.c
 +++ b/servers/slapd/back-mdb/dn2entry.c
 @@ -35,6 +35,7 @@ mdb_dn2entry(
@@ -169,7 +168,7 @@ index 50b6688ae..123daecdf 100644
  		if ( matched ) {
  			rc2 = mdb_cursor_open( tid, mdb->mi_id2entry, &mc );
 diff --git a/servers/slapd/back-mdb/dn2id.c b/servers/slapd/back-mdb/dn2id.c
-index 31692a079..70c36fdb4 100644
+index 1ac804f22..6a50a61e5 100644
 --- a/servers/slapd/back-mdb/dn2id.c
 +++ b/servers/slapd/back-mdb/dn2id.c
 @@ -46,8 +46,8 @@ typedef struct diskNode {
@@ -356,7 +355,7 @@ index 31692a079..70c36fdb4 100644
  			if ( !isc->nscope )
  				break;
 diff --git a/servers/slapd/back-mdb/filterindex.c b/servers/slapd/back-mdb/filterindex.c
-index b71f0d39d..04cf72912 100644
+index e3895d276..5a0597e7a 100644
 --- a/servers/slapd/back-mdb/filterindex.c
 +++ b/servers/slapd/back-mdb/filterindex.c
 @@ -514,7 +514,8 @@ ext_candidates(
@@ -380,10 +379,10 @@ index b71f0d39d..04cf72912 100644
  			/* exactly one ID can match */
  			ids[0] = 1;
 diff --git a/servers/slapd/back-mdb/id2entry.c b/servers/slapd/back-mdb/id2entry.c
-index 8899a56b3..cbaaabc8b 100644
+index bdfa075c0..ef4a1818f 100644
 --- a/servers/slapd/back-mdb/id2entry.c
 +++ b/servers/slapd/back-mdb/id2entry.c
-@@ -600,7 +600,7 @@ int mdb_entry_get(
+@@ -601,7 +601,7 @@ int mdb_entry_get(
  	txn = moi->moi_txn;
  
  	/* can we find entry */
@@ -393,10 +392,10 @@ index 8899a56b3..cbaaabc8b 100644
  	case MDB_NOTFOUND:
  	case 0:
 diff --git a/servers/slapd/back-mdb/modify.c b/servers/slapd/back-mdb/modify.c
-index 3049e8a87..d37a2b382 100644
+index 04a6d8596..ccb835b90 100644
 --- a/servers/slapd/back-mdb/modify.c
 +++ b/servers/slapd/back-mdb/modify.c
-@@ -596,7 +596,7 @@ mdb_modify( Operation *op, SlapReply *rs )
+@@ -602,7 +602,7 @@ mdb_modify( Operation *op, SlapReply *rs )
  	}
  
  	/* get entry or ancestor */
@@ -406,7 +405,7 @@ index 3049e8a87..d37a2b382 100644
  	if ( rs->sr_err != 0 ) {
  		Debug( LDAP_DEBUG_TRACE,
 diff --git a/servers/slapd/back-mdb/modrdn.c b/servers/slapd/back-mdb/modrdn.c
-index d9a880f0a..5bc760afb 100644
+index 88b7b43c3..69ccfdd06 100644
 --- a/servers/slapd/back-mdb/modrdn.c
 +++ b/servers/slapd/back-mdb/modrdn.c
 @@ -46,7 +46,7 @@ mdb_modrdn( Operation	*op, SlapReply *rs )
@@ -456,7 +455,7 @@ index d9a880f0a..5bc760afb 100644
  	switch( rs->sr_err ) {
  	case MDB_NOTFOUND:
  		break;
-@@ -436,7 +438,7 @@ mdb_modrdn( Operation	*op, SlapReply *rs )
+@@ -434,7 +436,7 @@ mdb_modrdn( Operation	*op, SlapReply *rs )
  	 * If moving to a new parent, must delete current subtree count,
  	 * otherwise leave it unchanged since we'll be adding it right back.
  	 */
@@ -465,7 +464,7 @@ index d9a880f0a..5bc760afb 100644
  	if ( rs->sr_err != 0 ) {
  		Debug(LDAP_DEBUG_TRACE,
  			"<=- " LDAP_XSTRING(mdb_modrdn)
-@@ -455,7 +457,7 @@ mdb_modrdn( Operation	*op, SlapReply *rs )
+@@ -453,7 +455,7 @@ mdb_modrdn( Operation	*op, SlapReply *rs )
  
  	/* add new DN */
  	rs->sr_err = mdb_dn2id_add( op, mc, mc, np ? np->e_id : p->e_id,
@@ -475,10 +474,10 @@ index d9a880f0a..5bc760afb 100644
  		Debug(LDAP_DEBUG_TRACE,
  			"<=- " LDAP_XSTRING(mdb_modrdn)
 diff --git a/servers/slapd/back-mdb/proto-mdb.h b/servers/slapd/back-mdb/proto-mdb.h
-index 126eaf0b3..055001cfe 100644
+index 8025fdb8c..52213aa67 100644
 --- a/servers/slapd/back-mdb/proto-mdb.h
 +++ b/servers/slapd/back-mdb/proto-mdb.h
-@@ -60,7 +60,7 @@ int mdb_back_init_cf( BackendInfo *bi );
+@@ -69,7 +69,7 @@ int mdb_back_init_cf( BackendInfo *bi );
   */
  
  int mdb_dn2entry LDAP_P(( Operation *op, MDB_txn *tid, MDB_cursor *mc,
@@ -487,7 +486,7 @@ index 126eaf0b3..055001cfe 100644
  
  /*
   * dn2id.c
-@@ -73,6 +73,7 @@ int mdb_dn2id(
+@@ -82,6 +82,7 @@ int mdb_dn2id(
  	struct berval *ndn,
  	ID *id,
  	ID *nsubs,
@@ -495,7 +494,7 @@ index 126eaf0b3..055001cfe 100644
  	struct berval *matched,
  	struct berval *nmatched );
  
-@@ -83,13 +84,15 @@ int mdb_dn2id_add(
+@@ -92,13 +93,15 @@ int mdb_dn2id_add(
  	ID pid,
  	ID nsubs,
  	int upsub,
@@ -513,7 +512,7 @@ index 126eaf0b3..055001cfe 100644
  int mdb_dn2id_children(
  	Operation *op,
 diff --git a/servers/slapd/back-mdb/search.c b/servers/slapd/back-mdb/search.c
-index dc7b33a78..1a94fb3ab 100644
+index fcda47f40..a43ccfdd3 100644
 --- a/servers/slapd/back-mdb/search.c
 +++ b/servers/slapd/back-mdb/search.c
 @@ -98,7 +98,7 @@ static Entry * deref_base (
@@ -545,7 +544,7 @@ index dc7b33a78..1a94fb3ab 100644
  	switch(rs->sr_err) {
  	case MDB_NOTFOUND:
 diff --git a/servers/slapd/back-mdb/tools.c b/servers/slapd/back-mdb/tools.c
-index b5f8bccb7..217538b62 100644
+index cce8115ff..7581f4496 100644
 --- a/servers/slapd/back-mdb/tools.c
 +++ b/servers/slapd/back-mdb/tools.c
 @@ -343,7 +343,7 @@ ID mdb_tool_dn2id_get(

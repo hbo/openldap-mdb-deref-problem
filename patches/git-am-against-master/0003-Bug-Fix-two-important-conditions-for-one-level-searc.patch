@@ -1,0 +1,35 @@
+From dba8e54a67b6592ed8a940b5146ad92789f7698c Mon Sep 17 00:00:00 2001
+From: Henrik Bohnenkamp <hbohnenkamp@united-internet.de>
+Date: Sun, 3 Feb 2019 21:32:01 +0100
+Subject: [PATCH 3/3] Bug Fix: two important conditions for one-level searches
+ were missing.
+
+---
+ servers/slapd/back-mdb/dn2id.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/servers/slapd/back-mdb/dn2id.c b/servers/slapd/back-mdb/dn2id.c
+index eb814316e..d60f0264e 100644
+--- a/servers/slapd/back-mdb/dn2id.c
++++ b/servers/slapd/back-mdb/dn2id.c
+@@ -1076,7 +1076,7 @@ mdb_get_aliases(
+ 	if ( !naliases)
+ 		goto done;
+ 
+-	if (naliases > MDB_IDL_DB_SIZE-1){
++	if (oscope == LDAP_SCOPE_SUBTREE && naliases > MDB_IDL_DB_SIZE-1){
+ 		MDB_IDL_RANGE( res, MDB_IDL_FIRST( ids ), MDB_IDL_LAST( ids ));
+ 		goto done;
+ 	}
+@@ -1095,7 +1095,7 @@ mdb_get_aliases(
+ 				memcpy( &id, ptr, sizeof(ID));
+ 
+ 				/* If we're pushing down, see if there's any children to find */
+-				if ( nscope ) {
++				if ( nscope || oscope == LDAP_SCOPE_ONELEVEL ) {
+ 					ptr += sizeof(ID);
+ 					memcpy( &nsubs, ptr, sizeof(ID));
+ 					/* No children, go to next sibling */
+-- 
+2.17.1
+

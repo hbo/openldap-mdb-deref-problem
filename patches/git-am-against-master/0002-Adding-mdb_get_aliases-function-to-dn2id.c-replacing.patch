@@ -1,7 +1,7 @@
-From 9992938647f99879959ba40bd496e7894b9cb147 Mon Sep 17 00:00:00 2001
+From cad26e0f9bd6d9131fbd54d090d32494aa1d1380 Mon Sep 17 00:00:00 2001
 From: Henrik Bohnenkamp <hbohnenkamp@united-internet.de>
 Date: Wed, 20 Jun 2018 18:22:40 +0200
-Subject: [PATCH 2/2] Adding mdb_get_aliases function to dn2id.c replacing
+Subject: [PATCH 2/3] Adding mdb_get_aliases function to dn2id.c replacing
  mdb_idscope
 
 The new function mdb_get_aliases in dn2id.c is a replacement of
@@ -42,7 +42,6 @@ OpenLDAP Software (and only these modifications) into the public
 domain. Hence, these modifications may be freely used and/or
 redistributed for any purpose with or without attribution and/or other
 notice.
-
 ---
  servers/slapd/back-mdb/delete.c    |   2 +-
  servers/slapd/back-mdb/dn2id.c     | 165 +++++++++++++++++++++++++++++
@@ -51,7 +50,7 @@ notice.
  4 files changed, 176 insertions(+), 2 deletions(-)
 
 diff --git a/servers/slapd/back-mdb/delete.c b/servers/slapd/back-mdb/delete.c
-index b6e0e4583..7a074d45f 100644
+index 1e723977e..559c1d1c8 100644
 --- a/servers/slapd/back-mdb/delete.c
 +++ b/servers/slapd/back-mdb/delete.c
 @@ -296,7 +296,7 @@ mdb_delete( Operation *op, SlapReply *rs )
@@ -64,7 +63,7 @@ index b6e0e4583..7a074d45f 100644
  	if ( rs->sr_err != 0 ) {
  		Debug(LDAP_DEBUG_TRACE,
 diff --git a/servers/slapd/back-mdb/dn2id.c b/servers/slapd/back-mdb/dn2id.c
-index 70c36fdb4..89a35e9a9 100644
+index 6a50a61e5..eb814316e 100644
 --- a/servers/slapd/back-mdb/dn2id.c
 +++ b/servers/slapd/back-mdb/dn2id.c
 @@ -50,6 +50,23 @@ typedef struct diskNode {
@@ -244,10 +243,10 @@ index 70c36fdb4..89a35e9a9 100644
 +	return LDAP_SUCCESS;
 +}
 diff --git a/servers/slapd/back-mdb/proto-mdb.h b/servers/slapd/back-mdb/proto-mdb.h
-index 055001cfe..fac789157 100644
+index 52213aa67..7e5a60da1 100644
 --- a/servers/slapd/back-mdb/proto-mdb.h
 +++ b/servers/slapd/back-mdb/proto-mdb.h
-@@ -153,6 +153,14 @@ void mdb_dn2id_wrestore(
+@@ -162,6 +162,14 @@ void mdb_dn2id_wrestore(
  	Operation *op,
  	struct IdScopes *isc );
  
@@ -263,7 +262,7 @@ index 055001cfe..fac789157 100644
  
  /*
 diff --git a/servers/slapd/back-mdb/search.c b/servers/slapd/back-mdb/search.c
-index 1a94fb3ab..c25b17b36 100644
+index a43ccfdd3..707b4eab0 100644
 --- a/servers/slapd/back-mdb/search.c
 +++ b/servers/slapd/back-mdb/search.c
 @@ -174,7 +174,8 @@ static int search_aliases(
