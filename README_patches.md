@@ -40,6 +40,11 @@ The naliases entry of the search root id is exploited like this:
   is essentially the same behavior as implemented in mdb_idscope, only
   that it takes orders of magnitude fewer CPU cycles to get there.
 
+### 0003-Bug-Fix-two-important-conditions-for-one-level-searc.patch
+
+Bugfix for one-level searches. Two conditions in mdb_get_aliases added
+to return aliases in the layer below search base. 
+
 
 ## Discussion
 
