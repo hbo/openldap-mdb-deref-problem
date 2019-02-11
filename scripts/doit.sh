@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-
+tree_generator=${1:-write_tree.py}
 
 pref="${OPENLDAP:-$HOME/openldap}"
 
@@ -128,7 +128,7 @@ echo "HDB slapd running under pid  $hdbpid port 1234"
 if [ -z "$ldiffile"  ]; then
     echo "Building DIT"
 
-    time python3 write_tree.py
+    time python3 $tree_generator
 
     ret=$?
     if [ $ret -ne 0 ] ;then
