@@ -142,7 +142,7 @@ index 4592ae15b..1e723977e 100644
  	/* delete from dn2id */
 -	rs->sr_err = mdb_dn2id_delete( op, mc, e->e_id, 1 );
 +	rs->sr_err = mdb_dn2id_delete( op, mc, e->e_id, 1,
-+								   is_entry_alias(op->ora_e) ? 1 : 0 );
++								   is_entry_alias(e) ? 1 : 0 );
  	mdb_cursor_close( mc );
  	if ( rs->sr_err != 0 ) {
  		Debug(LDAP_DEBUG_TRACE,
@@ -171,16 +171,14 @@ diff --git a/servers/slapd/back-mdb/dn2id.c b/servers/slapd/back-mdb/dn2id.c
 index 1ac804f22..6a50a61e5 100644
 --- a/servers/slapd/back-mdb/dn2id.c
 +++ b/servers/slapd/back-mdb/dn2id.c
-@@ -46,8 +46,8 @@ typedef struct diskNode {
+@@ -46,6 +46,7 @@ typedef struct diskNode {
  	unsigned char nrdnlen[2];
  	char nrdn[1];
  	char rdn[1];                        /* variable placement */
 +	unsigned char extrainfo[sizeof(ID)]; /* variable placement */
  	unsigned char entryID[sizeof(ID)];  /* variable placement */
--	/* unsigned char nsubs[sizeof(ID)];	in child nodes only */
+ 	/* unsigned char nsubs[sizeof(ID)];	in child nodes only */
  } diskNode;
- 
- /* Sort function for the sorted duplicate data items of a dn2id key.
 @@ -87,6 +87,7 @@ mdb_dn2id_add(
  	ID pid,
  	ID nsubs,

@@ -43,34 +43,20 @@ domain. Hence, these modifications may be freely used and/or
 redistributed for any purpose with or without attribution and/or other
 notice.
 ---
- servers/slapd/back-mdb/delete.c    |   2 +-
  servers/slapd/back-mdb/dn2id.c     | 165 +++++++++++++++++++++++++++++
  servers/slapd/back-mdb/proto-mdb.h |   8 ++
  servers/slapd/back-mdb/search.c    |   3 +-
  4 files changed, 176 insertions(+), 2 deletions(-)
 
-diff --git a/servers/slapd/back-mdb/delete.c b/servers/slapd/back-mdb/delete.c
-index 1e723977e..559c1d1c8 100644
---- a/servers/slapd/back-mdb/delete.c
-+++ b/servers/slapd/back-mdb/delete.c
-@@ -296,7 +296,7 @@ mdb_delete( Operation *op, SlapReply *rs )
- 
- 	/* delete from dn2id */
- 	rs->sr_err = mdb_dn2id_delete( op, mc, e->e_id, 1,
--								   is_entry_alias(op->ora_e) ? 1 : 0 );
-+								   is_entry_alias(e) ? 1 : 0 );
- 	mdb_cursor_close( mc );
- 	if ( rs->sr_err != 0 ) {
- 		Debug(LDAP_DEBUG_TRACE,
 diff --git a/servers/slapd/back-mdb/dn2id.c b/servers/slapd/back-mdb/dn2id.c
 index 6a50a61e5..eb814316e 100644
 --- a/servers/slapd/back-mdb/dn2id.c
 +++ b/servers/slapd/back-mdb/dn2id.c
 @@ -50,6 +50,23 @@ typedef struct diskNode {
- 	unsigned char entryID[sizeof(ID)];  /* variable placement */
+ 	/* unsigned char nsubs[sizeof(ID)];	in child nodes only */
  } diskNode;
  
-+static inline int
++static int
 +mdb_get_naliases(MDB_val*  data, ID *naliases)
 +{
 +	char* ptr;
@@ -79,7 +65,7 @@ index 6a50a61e5..eb814316e 100644
 +	return 0;
 +}
 +
-+static inline int
++static int
 +mdb_get_parent_id(MDB_val *data, ID *id){
 +	char* ptr;
 +	ptr = data->mv_data  + data->mv_size - sizeof(ID);
@@ -137,7 +123,7 @@ index 6a50a61e5..eb814316e 100644
 +	if ( !naliases)
 +		goto done;
 +
-+	if (naliases > MDB_IDL_DB_SIZE-1){
++	if (oscope == LDAP_SCOPE_SUBTREE && naliases > MDB_IDL_DB_SIZE-1){
 +		MDB_IDL_RANGE( res, MDB_IDL_FIRST( ids ), MDB_IDL_LAST( ids ));
 +		goto done;
 +	}
@@ -156,7 +142,7 @@ index 6a50a61e5..eb814316e 100644
 +				memcpy( &id, ptr, sizeof(ID));
 +
 +				/* If we're pushing down, see if there's any children to find */
-+				if ( nscope ) {
++				if ( nscope || oscope == LDAP_SCOPE_ONELEVEL ) {
 +					ptr += sizeof(ID);
 +					memcpy( &nsubs, ptr, sizeof(ID));
 +					/* No children, go to next sibling */
