@@ -40,11 +40,6 @@ The naliases entry of the search root id is exploited like this:
   is essentially the same behavior as implemented in mdb_idscope, only
   that it takes orders of magnitude fewer CPU cycles to get there.
 
-### 0003-Bug-Fix-two-important-conditions-for-one-level-searc.patch
-
-Bugfix for one-level searches. Two conditions in mdb_get_aliases added
-to return aliases in the layer below search base. 
-
 
 ## Discussion
 
@@ -83,10 +78,21 @@ as well, though.
 
 ### Longterm tests
 
-This is still to do.
+Longterm tests have been conducted  in a productive environment. The
+test comprised mostly searches and binds, derived from log files. The
+binds and searches were two slapd instances serving the same data, but
+one configured wich back-hdb as database backend, the others with the
+patched back-mdb. 
 
-Plans are to derive test-cases from log files and to do regression
-testing between a patched back-mdb and a back-hdb configuration.
+
+
+Ones  regression has been found that came back to a bug in this
+patch. That has been fixed. Another regression points in fact to a bug
+in the back-hdb.  See
+https://www.openldap.org/its/index.cgi/Incoming?id=8875#followup3 and
+https://www.openldap.org/its/index.cgi/Incoming?id=8875#followup5 for
+more.
+
 
 #  Patch for openldap 2.4.46 
 
@@ -96,4 +102,4 @@ also to version 2.4.47 without problem, since the changes in the
 back-mdb code  between 2.4.46 and 2.4.47 are small and do
 not conflict. 
 
-Still untested, though.
+
