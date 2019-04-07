@@ -1,7 +1,9 @@
 # OpenLDAP, back-mdb, and alias dereferencing in large DITs 
 
 This repo contains scripts to set up a demonstration of a problem in
-the OpenLDAP slapd. 
+the OpenLDAP slapd.  The related bug report is ITS#8875 on the
+openldap web page:
+https://www.openldap.org/its/index.cgi/Incoming?id=8875 
 
 ## Problem description 
 
