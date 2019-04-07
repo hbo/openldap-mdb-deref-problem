@@ -1,7 +1,7 @@
-From cad26e0f9bd6d9131fbd54d090d32494aa1d1380 Mon Sep 17 00:00:00 2001
+From 932a350db2cdbf44042c86913c2deb79e5d12805 Mon Sep 17 00:00:00 2001
 From: Henrik Bohnenkamp <hbohnenkamp@united-internet.de>
 Date: Wed, 20 Jun 2018 18:22:40 +0200
-Subject: [PATCH 2/3] Adding mdb_get_aliases function to dn2id.c replacing
+Subject: [PATCH 2/2] Adding mdb_get_aliases function to dn2id.c replacing
  mdb_idscope
 
 The new function mdb_get_aliases in dn2id.c is a replacement of
@@ -45,14 +45,14 @@ notice.
 ---
  servers/slapd/back-mdb/dn2id.c     | 165 +++++++++++++++++++++++++++++
  servers/slapd/back-mdb/proto-mdb.h |   8 ++
- servers/slapd/back-mdb/search.c    |   3 +-
- 4 files changed, 176 insertions(+), 2 deletions(-)
+ servers/slapd/back-mdb/search.c    |   2 +-
+ 3 files changed, 174 insertions(+), 1 deletion(-)
 
 diff --git a/servers/slapd/back-mdb/dn2id.c b/servers/slapd/back-mdb/dn2id.c
-index 6a50a61e5..eb814316e 100644
+index 6c845b6b0..bccadcd86 100644
 --- a/servers/slapd/back-mdb/dn2id.c
 +++ b/servers/slapd/back-mdb/dn2id.c
-@@ -50,6 +50,23 @@ typedef struct diskNode {
+@@ -51,6 +51,23 @@ typedef struct diskNode {
  	/* unsigned char nsubs[sizeof(ID)];	in child nodes only */
  } diskNode;
  
@@ -76,7 +76,7 @@ index 6a50a61e5..eb814316e 100644
  /* Sort function for the sorted duplicate data items of a dn2id key.
   * Sorts based on normalized RDN, in length order.
   */
-@@ -1016,3 +1033,151 @@ void mdb_dn2id_wrestore (
+@@ -1017,3 +1034,151 @@ void mdb_dn2id_wrestore (
  		isc->rdns[n].bv_val = d->nrdn+isc->nrdns[n].bv_len+1;
  	}
  }
@@ -108,7 +108,7 @@ index 6a50a61e5..eb814316e 100644
 +
 +	rc = mdb_cursor_open( txn, dbi, &cursor );
 +	if ( rc ) return rc;
-+	scopes = ch_malloc( MDB_IDL_UM_SIZE * sizeof( ID2 ));
++	scopes = ch_malloc( MDB_idl_um_size * sizeof( ID2 ));
 +	numrdns = 0;
 +
 +	MDB_IDL_ZERO( res );
@@ -123,7 +123,7 @@ index 6a50a61e5..eb814316e 100644
 +	if ( !naliases)
 +		goto done;
 +
-+	if (oscope == LDAP_SCOPE_SUBTREE && naliases > MDB_IDL_DB_SIZE-1){
++	if (oscope == LDAP_SCOPE_SUBTREE && naliases > MDB_idl_db_size-1){
 +		MDB_IDL_RANGE( res, MDB_IDL_FIRST( ids ), MDB_IDL_LAST( ids ));
 +		goto done;
 +	}
@@ -157,7 +157,7 @@ index 6a50a61e5..eb814316e 100644
 +						if (na){
 +							assert(na == 1);
 +							found_aliases++;
-+							if ( res[0] >= MDB_IDL_DB_SIZE-1 ) {
++							if ( res[0] >= MDB_idl_db_size-1 ) {
 +								/* too many aliases in scope. Fallback to range */
 +								MDB_IDL_RANGE( res, MDB_IDL_FIRST( ids ), MDB_IDL_LAST( ids ));
 +								goto done;
@@ -248,15 +248,14 @@ index 52213aa67..7e5a60da1 100644
  
  /*
 diff --git a/servers/slapd/back-mdb/search.c b/servers/slapd/back-mdb/search.c
-index a43ccfdd3..707b4eab0 100644
+index a3f481be3..ac8622564 100644
 --- a/servers/slapd/back-mdb/search.c
 +++ b/servers/slapd/back-mdb/search.c
-@@ -174,7 +174,8 @@ static int search_aliases(
+@@ -174,7 +174,7 @@ static int search_aliases(
  		/* Set curscop to only the aliases in the current scope. Start with
  		 * all the aliases, then get the intersection with the scope.
  		 */
 -		rs->sr_err = mdb_idscope( op, isc->mt, e_id, aliases, curscop );
-+		// rs->sr_err = mdb_idscope( op, isc->mt, e_id, aliases, curscop );
 +		rs->sr_err = mdb_get_aliases(op, isc->mt, e_id, aliases, curscop);
  
  		/* Dereference all of the aliases in the current scope. */
