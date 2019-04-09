@@ -131,6 +131,6 @@ request.
 
 ## Patch
 
-The patches to fix the problem are described in README_patches.md. 
+The patches to fix the problem are described in [README_patches.md](README_patches.md). 
 
 
